@@ -20,6 +20,7 @@ public class LedLuxDB extends SQLiteOpenHelper {
     // Database Name
     private static final String DATABASE_NAME = "LedLuxDB";
 
+    // marker
     public LedLuxDB(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
@@ -31,21 +32,19 @@ public class LedLuxDB extends SQLiteOpenHelper {
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 "days_on INTEGER, " +
                 "days_off INTEGER, " +
-                "name TEXT, "+
-                "username TEXT, "+
+                "name TEXT, " +
+                "username TEXT, " +
                 "password TEXT )";
 
-        String CREATE_MANAGER_TABLE = "CREATE TABLE worker ( " +
+        String CREATE_MANAGER_TABLE = "CREATE TABLE manager ( " +
                 "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                "days_on INTEGER, " +
-                "days_off INTEGER, " +
-                "name TEXT, "+
-                "username TEXT, "+
+                "name TEXT, " +
+                "username TEXT, " +
                 "password TEXT )";
 
-        // create userss table
+        // create workers table
         db.execSQL(CREATE_Workers_TABLE);
-
+        db.execSQL(CREATE_MANAGER_TABLE);
     }
 
     @Override
@@ -75,9 +74,9 @@ public class LedLuxDB extends SQLiteOpenHelper {
     private static final String KEY_PASSWORD = "password";
 
 
-    private static final String[] USER_COLUMNS = {KEY_ID,KEY_NAME,KEY_days_on,KEY_days_off,KEY_USERNAME,KEY_PASSWORD};
+    private static final String[] WORKER_COLUMNS = {KEY_ID, KEY_NAME, KEY_days_on, KEY_days_off, KEY_USERNAME, KEY_PASSWORD};
 
-    public void addWorker(Worker worker){
+    public void addWorker(Worker worker) {
         Log.d("addWorker", worker.toString());
         // 1. get reference to writable DB
         SQLiteDatabase db = this.getWritableDatabase();
@@ -101,7 +100,7 @@ public class LedLuxDB extends SQLiteOpenHelper {
         db.close();
     }
 
-    public Worker getWorker(int id){
+    public Worker getWorker(int id) {
 
         // 1. get reference to readable DB
         SQLiteDatabase db = this.getReadableDatabase();
@@ -109,9 +108,9 @@ public class LedLuxDB extends SQLiteOpenHelper {
         // 2. build query
         Cursor cursor =
                 db.query(TABLE_WORKER, // a. table
-                        USER_COLUMNS, // b. column names
+                        WORKER_COLUMNS, // b. column names
                         " id = ?", // c. selections
-                        new String[] { String.valueOf(id) }, // d. selections args
+                        new String[]{String.valueOf(id)}, // d. selections args
                         null, // e. group by
                         null, // f. having
                         null, // g. order by
@@ -137,7 +136,7 @@ public class LedLuxDB extends SQLiteOpenHelper {
         return worker;
     }
 
-    public Worker getWorker(String username){
+    public Worker getWorker(String username) {
 
         // 1. get reference to readable DB
         SQLiteDatabase db = this.getReadableDatabase();
@@ -145,9 +144,9 @@ public class LedLuxDB extends SQLiteOpenHelper {
         // 2. build query
         Cursor cursor =
                 db.query(TABLE_WORKER, // a. table
-                        USER_COLUMNS, // b. column names
+                        WORKER_COLUMNS, // b. column names
                         " username = ?", // c. selections
-                        new String[] { String.valueOf(username) }, // d. selections args
+                        new String[]{String.valueOf(username)}, // d. selections args
                         null, // e. group by
                         null, // f. having
                         null, // g. order by
@@ -167,11 +166,10 @@ public class LedLuxDB extends SQLiteOpenHelper {
             worker.setDaysOff(cursor.getInt(3));
             worker.setUsername(cursor.getString(4));
             worker.setPassword(cursor.getString(5));
-            Log.d("getUser(" + username + ")", worker.toString());
+            Log.d("getWorker(" + username + ")", worker.toString());
             return worker;
-        }
-        else {
-            Log.d("getUser(" + username + ")", "null");
+        } else {
+            Log.d("getWorker(" + username + ")", "null");
             return null;
         }
         // 5. return user
@@ -229,8 +227,8 @@ public class LedLuxDB extends SQLiteOpenHelper {
         // 3. updating row
         int i = db.update(TABLE_WORKER, //table
                 values, // column/value
-                KEY_ID+" = ?", // selections
-                new String[] { String.valueOf(worker.getId()) }); //selection args
+                KEY_ID + " = ?", // selections
+                new String[]{String.valueOf(worker.getId())}); //selection args
 
         // 4. close
         db.close();
@@ -247,12 +245,141 @@ public class LedLuxDB extends SQLiteOpenHelper {
 
         // 2. delete
         db.delete(TABLE_WORKER,
-                KEY_ID+" = ?",
-                new String[] { String.valueOf(worker.getId()) });
+                KEY_ID + " = ?",
+                new String[]{String.valueOf(worker.getId())});
 
         // 3. close
         db.close();
 
         Log.d("deleteWorker", worker.toString());
     }
+
+    // Manager
+    private static final String TABLE_MANAGER = "manager";
+    private static final String KEY_ID_MANAGER = "id";
+    private static final String KEY_NAME_MANAGER = "name";
+    private static final String KEY_USERNAME_MANAGER = "username";
+    private static final String KEY_MANAGER = "password";
+
+
+    private static final String[] MANAGER_COLUMNS = {KEY_ID, KEY_NAME, KEY_USERNAME, KEY_PASSWORD};
+
+    public void addManager(Manager manager) {
+        Log.d("addManager", manager.toString());
+        // 1. get reference to writable DB
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        // 2. create ContentValues to add key "column"/value
+        ContentValues values = new ContentValues();
+        values.put(KEY_ID, manager.getId());
+        values.put(KEY_NAME, manager.getName()); // get title
+
+        values.put(KEY_USERNAME, manager.getUsername()); // get title
+        values.put(KEY_PASSWORD, manager.getPassword()); // get title
+
+
+        db.insert(TABLE_MANAGER, // table
+                null, //nullColumnHack
+                values); // key/value -> keys = column names/ values = column values
+
+        // 4. close
+        db.close();
+    }
+
+    public Manager getManager(int id) {
+
+        // 1. get reference to readable DB
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // 2. build query
+        Cursor cursor =
+                db.query(TABLE_MANAGER, // a. table
+                        MANAGER_COLUMNS, // b. column names
+                        " id = ?", // c. selections
+                        new String[]{String.valueOf(id)}, // d. selections args
+                        null, // e. group by
+                        null, // f. having
+                        null, // g. order by
+                        null); // h. limit
+
+        if (cursor != null)
+            cursor.moveToFirst();
+
+        // 4. build user object
+        Manager manager = new Manager();
+        manager.setId(Integer.parseInt(cursor.getString(0)));
+        manager.setName(cursor.getString(1));
+        manager.setUsername(cursor.getString(2));
+        manager.setPassword(cursor.getString(3));
+
+        Log.d("getManager" +
+                "(" + id + ")", manager.toString());
+
+        // 5. return user
+        return manager;
+    }
+
+    public Manager getManager(String username) {
+
+        // 1. get reference to readable DB
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // 2. build query
+        Cursor cursor =
+                db.query(TABLE_MANAGER, // a. table
+                        MANAGER_COLUMNS, // b. column names
+                        " username = ?", // c. selections
+                        new String[]{String.valueOf(username)}, // d. selections args
+                        null, // e. group by
+                        null, // f. having
+                        null, // g. order by
+                        null); // h. limit
+
+        if (cursor != null)
+            cursor.moveToFirst();
+
+        if (cursor.getCount() > 0) {
+            Manager manager = new Manager();
+            manager.setId(Integer.parseInt(cursor.getString(0)));
+            manager.setName(cursor.getString(1));
+            manager.setUsername(cursor.getString(2));
+            manager.setPassword(cursor.getString(3));
+            Log.d("getManager(" + username + ")", manager.toString());
+            return manager;
+        } else {
+            Log.d("getManager(" + username + ")", "null");
+            return null;
+        }
+        // 5. return user
+    }
 }
+    /*
+    public List<Manager> getAllmanagers() {
+        List<Manager> managers = new LinkedList<Worker>();
+
+        // 1. build the query
+        String query = "SELECT  * FROM " + TABLE_WORKER;
+
+        // 2. get reference to writable DB
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = db.rawQuery(query, null);
+
+        // 3. go over each row, build user and add it to list
+        Worker user = null;
+        if (cursor.moveToFirst()) {
+            do {
+                Worker worker = new Worker();
+                user.setId(Integer.parseInt(cursor.getString(0)));
+                user.setName(cursor.getString(1));
+                user.setDaysOn(cursor.getInt(2));
+                user.setDaysOff(cursor.getInt(3));
+                user.setUsername(cursor.getString(4));
+                user.setPassword(cursor.getString(5));
+
+                // Add user to users
+                workers.add(user);
+            } while (cursor.moveToNext());
+        }
+
+
+    }*/

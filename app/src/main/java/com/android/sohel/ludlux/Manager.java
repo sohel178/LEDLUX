@@ -14,12 +14,11 @@ public class Manager {
     public Manager() {
     }
 
-    public Manager(int id, String name, String username, String password, String surname) {
+    public Manager(int id, String name, String username, String password) {
         this.id = id;
         this.name = name;
         this.username = username;
         this.password = password;
-        this.surname = surname;
     }
 
     public int getId() {
@@ -54,13 +53,7 @@ public class Manager {
         this.password = password;
     }
 
-    public String getSurname() {
-        return surname;
-    }
 
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
 
     @Override
     public String toString() {
@@ -69,7 +62,7 @@ public class Manager {
                 ", name='" + name + '\'' +
                 ", username='" + username + '\'' +
                 ", password='" + password + '\'' +
-                ", surname='" + surname + '\'' +
+
                 '}';
     }
 }
